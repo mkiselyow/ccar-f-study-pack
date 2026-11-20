@@ -1,0 +1,13 @@
+{
+  "name": "ccar-f-study-pack",
+  "version": "0.1.0",
+  "description": "Study packs for the Claude Certified Architect – Foundations (CCAR-F) exam. Name a task from the exam guide (for example 3.2) and get a 25-minute, case-first pack: an exam-format case to guess, the reveal, right vs wrong code, a decision card and 3 practice questions with shuffled answers.",
+  "author": {
+    "name": "Max Kyselov",
+    "url": "https://github.com/mkiselyow"
+  },
+  "homepage": "https://github.com/mkiselyow/ccar-f-study-pack",
+  "repository": "https://github.com/mkiselyow/ccar-f-study-pack",
+  "license": "MIT",
+  "keywords": ["ccar-f", "claude-certified-architect", "exam-prep", "study", "certification", "learning"]
+}
