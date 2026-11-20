@@ -74,12 +74,18 @@ The teaching case and every practice question have 3 parts:
 2. **Production logs show:**, **Developers report:** or **Production data shows:**, with the evidence and every actor named: the customer, your agent (Claude), your code. Describe code behaviour as "your loop ends when…", never as a quote someone said.
 3. **Your guess:** 1 question in exam wording, such as "What change would most effectively fix this?" or "What should you do first?". No hint in the question, such as "why isn't X enough".
 
+The evidence shows the symptom a developer or a log would see, not the diagnosis: "Claude drops the down step in billing migrations", not "the rule never loads", so the learner finds the cause.
+
 The reveal speaks of "you" and "your agent" the same way as the case.
 
 ## Teaching content
 
 - Lead with the case, then the reveal. The rule comes out of the case; there is no separate rule or "why" section.
 - The mechanism is the real one, checked against the guide and the docs. No invented flags, files, fields or commands.
+- Every "Knowledge of" and "Skills in" line of the task is taught somewhere: in the reveal, the right-vs-wrong notes, the decision card or a question explanation.
+- The mechanism names the edge behaviours a question can turn on: what triggers it, what it is relative to, the default when a setting is missing, and what happens when it fails. Example for path rules: loads when Claude reads or edits a matching file, globs are relative to the project root, a rule with no `paths` or broken frontmatter loads in every session.
+- Every code or config block is valid as a real file: frontmatter starts on line 1, JSON and YAML parse, commands and flags exist. A snippet that would break the feature it teaches fails the pack.
+- The reveal has exactly 3 fields: Fix, Mechanism, and the one thing that matters most.
 - The decision card is the only summary. Each row is "if you see X, pick Y, not Z, because…".
 
 ## Practice questions
@@ -94,6 +100,8 @@ The reveal speaks of "you" and "your agent" the same way as the case.
   - multiple response.
 - No question reuses the files, tools, numbers, wording or need-to-mechanism pair of the teaching case or the right-vs-wrong example.
 - Wrong options are the exam's usual traps: over-engineering (a classifier, a routing layer), relying on a prompt where a rule must hold, self-reported confidence or sentiment, a bigger model or context window, blaming another part, hiding errors or stopping the whole run, and features that don't exist. Some options are only worse, not wrong; the explanation says which.
+- Each wrong option is something a competent developer might really try. No throwaways, such as restructuring the code to fit the config.
+- The keyed answer rests on documented, deterministic behaviour. If a wrong option could also work on some runs, change the stem to close that path.
 - 4 options for single answer, 5 for multiple response.
 
 ## `questions.json`

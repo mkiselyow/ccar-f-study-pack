@@ -30,7 +30,9 @@ You get both research reports. For each fact, decide: **keep** (the guide states
 
 Then plan the pack by `pack-format.md`:
 
-- the teaching case: scenario, what you built, the failure the evidence shows, the fix;
+- a coverage map: each "Knowledge of" and "Skills in" line of the task, and the part of the pack that teaches it;
+- the edge behaviours of the mechanism that the kept facts support (trigger, what it is relative to, default, failure fallback);
+- the teaching case: scenario, what you built, the failure the evidence shows, the fix. Its situation differs from every guide sample question;
 - the right-vs-wrong example;
 - the decision card rows (at most 4);
 - 3 practice questions: for each, the angle, the scenario, the right answer and the traps, all different from the teaching case;
@@ -50,6 +52,10 @@ Use only the kept facts of the judge. Write short sentences and plain words. Sho
 You did not write this pack. Read both files of the part and check every rule of `pack-format.md`, plus:
 
 - each technical claim against the kept facts; flag any claim the facts don't support;
+- the coverage map of the judge: every line of the task is taught, and the edge behaviours are stated;
+- every code or config block as if it were a real file: frontmatter on line 1, valid JSON and YAML, real flags;
+- every keyed answer holds on every run, not only on most;
+- no evidence line names the diagnosis instead of the symptom;
 - the exam's answer, not just a working answer: the most proportionate, deterministic, root-cause fix;
 - every wrong option is wrong or worse for a reason the explanation states;
 - no practice question reuses the teaching case's files, tools, numbers, wording or need-to-mechanism pair, and the 3 angles differ;
