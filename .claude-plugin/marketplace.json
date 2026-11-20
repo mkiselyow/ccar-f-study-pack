@@ -8,7 +8,7 @@
     {
       "name": "ccar-f-study-pack",
       "source": "./",
-      "description": "Name a task from the CCAR-F exam guide (for example 3.2) and get a 25-minute, case-first study pack with exam-format practice questions and randomly shuffled answers.",
+      "description": "Name a task from the CCAR-F exam guide (for example 3.2) and get a 45-minute, case-first study pack with exam-format practice questions and randomly shuffled answers.",
       "category": "learning",
       "keywords": ["ccar-f", "claude-certified-architect", "exam-prep", "study", "certification", "learning"],
       "homepage": "https://github.com/mkiselyow/ccar-f-study-pack",

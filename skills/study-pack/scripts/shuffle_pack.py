@@ -16,7 +16,8 @@ LETTERS = "ABCDEFGH"
 OPTION_ID = re.compile(r"^[a-z0-9_]+$")
 OPTION_REF = re.compile(r"\{opt:([^}]*)\}")
 WORDS_PER_MINUTE = 200
-MAX_WORDS = 1500
+MAX_WORDS = 2400
+LENGTH_MARGIN = 1.2
 FOOTER = ("*Practice questions written for this pack from the public CCAR-F exam guide and the Claude docs. "
           "They are not exam content: the exam's questions, options and scenarios are confidential under its NDA.*")
 SCENARIOS = ("Customer Support Resolution Agent", "Code Generation with Claude Code", "Multi-Agent Research System",
@@ -116,6 +117,11 @@ def check_question(question: object) -> None:
     expected_options = 5 if multi else 4
     if len(options) != expected_options:
         raise PackError(f"{qid}: {len(options)} options, expected {expected_options}")
+    shortest_correct = min(len(option["text"]) for option in options if option["correct"])
+    longest_wrong = max(len(option["text"]) for option in options if not option["correct"])
+    if shortest_correct > LENGTH_MARGIN * longest_wrong:
+        raise PackError(f"{qid}: the correct options are the longest by a clear margin "
+                        f"({shortest_correct} vs {longest_wrong} characters); even out the option lengths")
     check_case(question["stem"], qid)
     if re.search(r"pick \d", question["stem"], re.I):
         raise PackError(f"{qid}: the stem says 'pick N'; the script adds it")

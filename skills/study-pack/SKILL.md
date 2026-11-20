@@ -1,12 +1,12 @@
 ---
 name: study-pack
-description: Builds a case-first study pack for one task of the Claude Certified Architect – Foundations (CCAR-F) exam guide, such as 1.4 or 3.2, so a learner can understand it deeply in about 25 minutes. Runs a research, judge, write, review and fix pipeline of agents over the official exam guide and the Claude docs, then shuffles the practice answers with a real random source. Use when someone preparing for CCAR-F names a guide task ("3.2", "task 1.4", "make a pack for 4.3", "explain task statement 5.1"), asks to study, learn or practice a CCAR-F task, or asks for practice questions on one.
+description: Builds a case-first study pack for one task of the Claude Certified Architect – Foundations (CCAR-F) exam guide, such as 1.4 or 3.2, so a learner can understand it deeply in about 45 minutes. Runs a research, judge, write, review and fix pipeline of agents over the official exam guide and the Claude docs, then shuffles the practice answers with a real random source. Use when someone preparing for CCAR-F names a guide task ("3.2", "task 1.4", "make a pack for 4.3", "explain task statement 5.1"), asks to study, learn or practice a CCAR-F task, or asks for practice questions on one.
 argument-hint: <task, e.g. 3.2> [output folder]
 ---
 
 # CCAR-F study pack
 
-One pack per guide task, in Markdown, readable in **3–7 minutes raw** and **about 25 minutes** with the guesses and questions. The format rules live in [references/pack-format.md](references/pack-format.md), the agent instructions in [references/stages.md](references/stages.md). Paths below are relative to this skill's base directory.
+One pack per guide task, in Markdown, readable in **5–10 minutes raw** and **about 45 minutes, at most an hour,** with the guesses and questions. The format rules live in [references/pack-format.md](references/pack-format.md), the agent instructions in [references/stages.md](references/stages.md). Paths below are relative to this skill's base directory.
 
 ## 1. Settle the inputs
 
@@ -48,7 +48,7 @@ For each part, run the script, not a model, so answer letters and question order
 python3 -I scripts/shuffle_pack.py "<part folder>/body.md" "<part folder>/questions.json" "<output folder>/<part id>.md"
 ```
 
-It shuffles question order and option order with `secrets.SystemRandom`, fills in the `{opt:id}` letters, appends the answer key as an HTML comment, and prints the key, the word count and the reading time. It creates the output folder if needed. On a broken pack (case shape, options, placeholders, more than 1,500 words) it exits non-zero with the rule that failed and writes nothing; send the part back to the `Fix` stage with that message, then run the script again. A part whose result is null failed inside the workflow: re-run the Workflow with `resumeFromRunId` to retry it.
+It shuffles question order and option order with `secrets.SystemRandom`, fills in the `{opt:id}` letters, appends the answer key as an HTML comment, and prints the key, the word count and the reading time. It creates the output folder if needed. On a broken pack (case shape, options, placeholders, more than 2,400 words) it exits non-zero with the rule that failed and writes nothing; send the part back to the `Fix` stage with that message, then run the script again. A part whose result is null failed inside the workflow: re-run the Workflow with `resumeFromRunId` to retry it.
 
 ## 5. Report
 

@@ -15,7 +15,7 @@ Before the exam, every candidate accepts an agreement (guide §14) that all exam
 
 ## Size
 
-- Raw reading 3–7 minutes: aim for about 1,200 words per pack. The shuffle script counts everything, code and tables included, and fails above 1,500. With the guesses and questions, about 25 minutes.
+- Raw reading 5–10 minutes: aim for about 1,800 words per pack. The shuffle script counts everything, code and tables included, and fails above 2,400. With the guesses and questions, about 45 minutes, at most an hour.
 - If the task needs more, split it into parts (`5.1a`, `5.1b`), each a full pack of its own. The judge decides the split.
 - Cut anything the exam doesn't test. The guide's out-of-scope list is never taught.
 
@@ -24,7 +24,7 @@ Before the exam, every candidate accepts an agreement (guide §14) that all exam
 ```markdown
 # Task <id>: <short title from the guide>
 
-Raw reading: about <n> min. With the guesses and questions: about 25 min.
+Raw reading: about <n> min. With the guesses and questions: about 45 min.
 Guide: p.<page> (Domain <d>, <weight>% of the exam). <Scenario names from the guide> lean on it most.
 <Only with learner context:> Your first attempt: "<objective>" **<score>%**. <Plan pointer if given.>
 
@@ -44,17 +44,21 @@ At every **Your guess** line, stop and answer before reading on. <Roles line>
 
 ## 2. Right vs wrong: <short title>
 
-<2 short code or config blocks, 10 lines or fewer each, or 1 block marked RIGHT with the wrong way in 1 line; then 1-line notes on the difference>
+<2 short code or config blocks, 15 lines or fewer each, or 1 block marked RIGHT with the wrong way in 1 line; then 1-line notes on the difference>
 
-## 3. Decision card
+## 3. Also in this task
+
+<Only when the task has topics the case and section 2 don't teach: 1 short block per topic, a 2–4 line explanation and a small before → after example, such as a vague handoff note next to a structured one>
+
+## 4. Decision card
 
 | If you see… | Pick | Not | Because |
 | --- | --- | --- | --- |
-<at most 4 rows>
+<at most 5 rows>
 
 ---
 
-## 4. Practice
+## 5. Practice
 
 {{QUESTIONS}}
 ```
@@ -74,7 +78,7 @@ The teaching case and every practice question have 3 parts:
 2. **Production logs show:**, **Developers report:** or **Production data shows:**, with the evidence and every actor named: the customer, your agent (Claude), your code. Describe code behaviour as "your loop ends when…", never as a quote someone said.
 3. **Your guess:** 1 question in exam wording, such as "What change would most effectively fix this?" or "What should you do first?". No hint in the question, such as "why isn't X enough".
 
-The evidence shows the symptom a developer or a log would see, not the diagnosis: "Claude drops the down step in billing migrations", not "the rule never loads", so the learner finds the cause.
+The evidence shows the symptom a developer or a log would see, not the diagnosis: "Claude drops the down step in billing migrations", not "the rule never loads", so the learner finds the cause. That includes error names and log lines that are the answer: "4 untested versions were published", not "the logs show a `KeyError` from the hook" when the crash of the hook is what the learner should work out.
 
 The reveal speaks of "you" and "your agent" the same way as the case.
 
@@ -82,11 +86,12 @@ The reveal speaks of "you" and "your agent" the same way as the case.
 
 - Lead with the case, then the reveal. The rule comes out of the case; there is no separate rule or "why" section.
 - The mechanism is the real one, checked against the guide and the docs. No invented flags, files, fields or commands.
-- Every "Knowledge of" and "Skills in" line of the task is taught somewhere: in the reveal, the right-vs-wrong notes, the decision card or a question explanation.
+- Every "Knowledge of" and "Skills in" line of the task is taught before the practice: in the reveal, the right-vs-wrong notes or "Also in this task". The decision card and the question explanations repeat what was taught; they never teach a topic for the first time.
 - The mechanism names the edge behaviours a question can turn on: what triggers it, what it is relative to, the default when a setting is missing, and what happens when it fails. Example for path rules: loads when Claude reads or edits a matching file, globs are relative to the project root, a rule with no `paths` or broken frontmatter loads in every session.
 - Every code or config block is valid as a real file: frontmatter starts on line 1, JSON and YAML parse, commands and flags exist. A snippet that would break the feature it teaches fails the pack.
+- A code block shows every piece of state it depends on, where it is set as well as where it is read. Example: a gate that reads `verified` also shows the `PostToolUse` hook that records the verified customer ID, not a comment saying it is set somewhere.
 - The reveal has exactly 3 fields: Fix, Mechanism, and the one thing that matters most.
-- The decision card is the only summary. Each row is "if you see X, pick Y, not Z, because…".
+- The decision card is the only summary, at most 5 rows. Each row is "if you see X, pick Y, not Z, because…".
 
 ## Practice questions
 
@@ -102,6 +107,7 @@ The reveal speaks of "you" and "your agent" the same way as the case.
 - Wrong options are the exam's usual traps: over-engineering (a classifier, a routing layer), relying on a prompt where a rule must hold, self-reported confidence or sentiment, a bigger model or context window, blaming another part, hiding errors or stopping the whole run, and features that don't exist. Some options are only worse, not wrong; the explanation says which.
 - Each wrong option is something a competent developer might really try. No throwaways, such as restructuring the code to fit the config.
 - The keyed answer rests on documented, deterministic behaviour. If a wrong option could also work on some runs, change the stem to close that path.
+- No option stands out by length. The correct options are never the longest ones by a clear margin: the script fails a question when they are, and the reviewer also checks that the correct option isn't the only specific or the only complete one.
 - 4 options for single answer, 5 for multiple response.
 
 ## `questions.json`

@@ -19,7 +19,7 @@ Report only what the guide says. Mark each fact with its page.
 Check the mechanics of the task against the official Claude documentation: https://code.claude.com/docs for Claude Code, https://platform.claude.com/docs for the API, the Agent SDK, tool use and MCP, and https://modelcontextprotocol.io for MCP itself. Use the web tools of the session (WebSearch, WebFetch or a web-fetch agent). Return:
 
 - the exact names of files, folders, settings, frontmatter keys, flags, fields, hook events and API parameters the task needs, each with its doc URL;
-- small, correct examples of each, 10 lines or fewer;
+- small, correct examples of each, 15 lines or fewer;
 - every place where the guide and the docs differ, and the docs' newer details the exam doesn't need.
 
 If no web tool works, say so and return nothing invented: the judge then relies on the guide only. Search only for the mechanics, never for exam questions, "recalled" items, dumps or practice tests (see "Exam content and the NDA" in `pack-format.md`).
@@ -30,13 +30,14 @@ You get both research reports. For each fact, decide: **keep** (the guide states
 
 Then plan the pack by `pack-format.md`:
 
-- a coverage map: each "Knowledge of" and "Skills in" line of the task, and the part of the pack that teaches it;
+- a coverage map: each "Knowledge of" and "Skills in" line of the task, and the part that teaches it: the reveal, the right-vs-wrong notes or "Also in this task", never only the decision card or a question;
 - the edge behaviours of the mechanism that the kept facts support (trigger, what it is relative to, default, failure fallback);
 - the teaching case: scenario, what you built, the failure the evidence shows, the fix. Its situation differs from every guide sample question;
 - the right-vs-wrong example;
-- the decision card rows (at most 4);
+- the "Also in this task" blocks for the topics the case doesn't teach;
+- the decision card rows (at most 5);
 - 3 practice questions: for each, the angle, the scenario, the right answer and the traps, all different from the teaching case;
-- the word estimate. If 1 pack can't teach the task in about 1,200 words, split it into parts (`<task>a`, `<task>b`) by sub-topic, each with its own plan.
+- the word estimate. If 1 pack can't teach the task in about 1,800 words, split it into parts (`<task>a`, `<task>b`) by sub-topic, each with its own plan.
 
 ## Write
 
@@ -60,7 +61,8 @@ It checks the case shape of the teaching case and every question, the 3 reveal f
 You did not write this pack. Read both files of the part and check every rule of `pack-format.md`, plus:
 
 - each technical claim against the kept facts; flag any claim the facts don't support;
-- the coverage map of the judge: every line of the task is taught, and the edge behaviours are stated;
+- the coverage map of the judge: every line of the task is taught before the practice, and the edge behaviours are stated;
+- every code block shows the state it reads being set, not only a comment about it;
 - every code or config block as if it were a real file: frontmatter on line 1, valid JSON and YAML, real flags;
 - every keyed answer holds on every run, not only on most;
 - no evidence line names the diagnosis instead of the symptom: words that name the mechanism, such as "in context", "loads" or "at session start", belong in the reveal or the explanation;
@@ -68,9 +70,9 @@ You did not write this pack. Read both files of the part and check every rule of
 - the exam's answer, not just a working answer: the most proportionate, deterministic, root-cause fix;
 - every wrong option is wrong or worse for a reason the explanation states;
 - no practice question reuses the teaching case's files, tools, numbers, wording or need-to-mechanism pair, and the 3 angles differ;
-- no question gives its answer away: the right option isn't the longest or the only specific one, and the question has no hint;
+- no question gives its answer away: the right option isn't the longest, the only specific or the only complete one, the evidence names no error or log line that is the answer, and the question has no hint;
 - no answer letters anywhere; every `{opt:id}` matches an option id;
-- the word count: about 1,200 words, code and tables included, never above 1,500;
+- the word count: about 1,800 words, code and tables included, never above 2,400;
 - "Exam content and the NDA" of `pack-format.md`: read the guide's sample questions in `guide.txt` and flag any case or practice question that shares a sample question's situation, tools or set of options, or reads like a remembered exam item, a dump or a practice-test item. Also check against any exam memory in the learner context.
 
 Return each issue with where it is, the problem and the fix. Return no issues if the pack passes.

@@ -1,6 +1,6 @@
 # ccar-f-study-pack
 
-A Claude Code plugin for preparing for the **Claude Certified Architect – Foundations (CCAR-F)** exam. Name a task from the exam guide, such as `3.2`, and it builds a study pack you work through in about 25 minutes.
+A Claude Code plugin for preparing for the **Claude Certified Architect – Foundations (CCAR-F)** exam. Name a task from the exam guide, such as `3.2`, and it builds a study pack you work through in about 45 minutes.
 
 ## Install
 
@@ -21,11 +21,12 @@ Or just ask: "make a study pack for task 1.4". Add an output folder after the ta
 
 1. **A case in exam format.** A scenario from the guide, the evidence ("Production logs show: …"), and a question you answer before reading on.
 2. **The reveal.** The fix, the mechanism in 2–3 sentences, and the one thing that matters most.
-3. **Right vs wrong.** Short code or config blocks side by side.
-4. **A decision card.** "If you see X, pick Y, not Z, because…", at most 4 rows.
-5. **3 practice questions.** Each from a different angle than the lesson, at least 1 multiple response, with the answer folded under the question.
+3. **Right vs wrong.** Short code or config blocks side by side, showing every piece of state they depend on.
+4. **Also in this task.** A short block with a before → after example for each topic of the task the case doesn't cover, so every topic is taught before the questions.
+5. **A decision card.** "If you see X, pick Y, not Z, because…", at most 5 rows.
+6. **3 practice questions.** Each from a different angle than the lesson, at least 1 multiple response, with the answer folded under the question.
 
-Raw reading is 3–7 minutes; with the guesses and questions about 25 minutes. A task too big for that is split into parts (`5.1a`, `5.1b`).
+Raw reading is 5–10 minutes; with the guesses and questions about 45 minutes, at most an hour. A task too big for that is split into parts (`5.1a`, `5.1b`).
 
 ## How it is built
 
