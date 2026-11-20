@@ -16,6 +16,7 @@ const format = `${skillDir}/references/pack-format.md`
 const inputs = [
   `Task: ${task}`,
   `Work folder: ${workDir}`,
+  `Skill folder: ${skillDir}`,
   `Guide text: ${workDir}/guide.txt`,
   `Pack format: ${format}`,
   `Learner context: ${learner || 'none'}`,

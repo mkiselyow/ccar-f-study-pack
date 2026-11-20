@@ -19,8 +19,43 @@ FOOTER = ("*Practice questions written for this pack from the public CCAR-F exam
           "They are not exam content: the exam's questions, options and scenarios are confidential under its NDA.*")
 
 
+SCENARIOS = ("Customer Support Resolution Agent", "Code Generation with Claude Code", "Multi-Agent Research System",
+             "Developer Productivity with Claude", "Claude Code for Continuous Integration",
+             "Structured Data Extraction")
+SCENARIO = re.compile(r"\*\*Scenario: (" + "|".join(map(re.escape, SCENARIOS)) + r")\.?\*\*")
+EVIDENCE = re.compile(r"\*\*(Production logs show|Developers report|Production data shows):\*\*")
+GUESS = re.compile(r"\*\*Your guess:\*\*")
+REVEAL_FIELDS = ["Fix", "Mechanism", "The one thing that matters most"]
+CODE_BLOCK = re.compile(r"^```[^\n]*\n(.*?)^```", re.S | re.M)
+
+
 class PackError(Exception):
     pass
+
+
+def check_case(text: str, where: str) -> None:
+    for name, pattern in (("'**Scenario: <exact guide name>**'", SCENARIO), ("an evidence label", EVIDENCE),
+                          ("'**Your guess:**'", GUESS)):
+        if not pattern.search(text):
+            raise PackError(f"{where}: missing {name}")
+
+
+def section(body: str, start: str, end: str) -> str:
+    match = re.search(re.escape(start) + r"(.*?)" + re.escape(end), body, re.S)
+    if not match:
+        raise PackError(f"body.md: no section from '{start}' to '{end}'")
+    return match.group(1)
+
+
+def check_body(body: str) -> None:
+    check_case(section(body, "## 1.", "### Reveal"), "teaching case")
+    fields = re.findall(r"^\*\*([^*]+?):\*\*", section(body, "### Reveal", "## 2."), re.M)
+    if fields != REVEAL_FIELDS:
+        raise PackError(f"reveal fields are {fields}, expected {REVEAL_FIELDS}")
+    for block in CODE_BLOCK.findall(body):
+        lines = block.split("\n")
+        if "---" in lines and lines[0] != "---" and all(not line.strip() for line in lines[:lines.index("---")]):
+            raise PackError("a code block has blank lines before its frontmatter; '---' must be on line 1")
 
 
 def check_question(question: dict) -> None:
@@ -37,6 +72,9 @@ def check_question(question: dict) -> None:
     expected_options = 5 if multi else 4
     if len(options) != expected_options:
         raise PackError(f"{qid}: {len(options)} options, expected {expected_options}")
+    check_case(question["stem"], qid)
+    if re.search(r"pick \d", question["stem"], re.I):
+        raise PackError(f"{qid}: the stem says 'pick N'; the script adds it")
     text = question["stem"] + question["explanation"]
     unknown = [ref for ref in OPTION_REF.findall(text) if ref not in ids]
     if unknown:
@@ -67,6 +105,7 @@ def build(body: str, questions: list[dict], rng: secrets.SystemRandom) -> tuple[
         raise PackError(f"{len(questions)} questions, expected 3")
     if not any(question.get("multi") for question in questions):
         raise PackError("no multiple-response question")
+    check_body(body)
     for question in questions:
         check_question(question)
     order = list(questions)

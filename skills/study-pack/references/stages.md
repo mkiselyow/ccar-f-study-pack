@@ -47,6 +47,14 @@ Write the part's 2 files into `<workDir>/<part id>/`:
 
 Use only the kept facts of the judge. Write short sentences and plain words. Show the code, the value or the before and after, instead of describing them.
 
+Then run the pack check and fix the files until it passes:
+
+```bash
+python3 -I <skill folder>/scripts/shuffle_pack.py <part folder>/body.md <part folder>/questions.json /dev/null
+```
+
+It checks the case shape of the teaching case and every question, the 3 reveal fields, frontmatter on line 1 of each code block, the options, the `{opt:id}` references and the word count.
+
 ## Review
 
 You did not write this pack. Read both files of the part and check every rule of `pack-format.md`, plus:
@@ -55,7 +63,8 @@ You did not write this pack. Read both files of the part and check every rule of
 - the coverage map of the judge: every line of the task is taught, and the edge behaviours are stated;
 - every code or config block as if it were a real file: frontmatter on line 1, valid JSON and YAML, real flags;
 - every keyed answer holds on every run, not only on most;
-- no evidence line names the diagnosis instead of the symptom;
+- no evidence line names the diagnosis instead of the symptom: words that name the mechanism, such as "in context", "loads" or "at session start", belong in the reveal or the explanation;
+- every wrong option has a trap type of `pack-format.md`; drop any option that is a personal preference, outside the repository, or a code restructure to fit the config;
 - the exam's answer, not just a working answer: the most proportionate, deterministic, root-cause fix;
 - every wrong option is wrong or worse for a reason the explanation states;
 - no practice question reuses the teaching case's files, tools, numbers, wording or need-to-mechanism pair, and the 3 angles differ;
@@ -68,4 +77,4 @@ Return each issue with where it is, the problem and the fix. Return no issues if
 
 ## Fix
 
-Apply every issue of the review to the 2 files of the part. Where an issue is wrong, leave the text and say why in your return. Then check the files once more against `pack-format.md`.
+Apply every issue of the review to the 2 files of the part. Where an issue is wrong, leave the text and say why in your return. Then run the pack check of the `Write` section and fix the files until it passes.
