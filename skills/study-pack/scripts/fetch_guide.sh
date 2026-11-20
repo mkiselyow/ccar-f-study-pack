@@ -15,7 +15,7 @@ fi
 
 if command -v pdftotext >/dev/null 2>&1; then
   pdftotext -layout "$work/guide.pdf" "$work/guide.txt"
-elif python3 -c 'import pypdf' >/dev/null 2>&1; then
+elif python3 -I -c 'import pypdf' >/dev/null 2>&1; then
   python3 -I -c '
 import sys, pypdf
 reader = pypdf.PdfReader(sys.argv[1])

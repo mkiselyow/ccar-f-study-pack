@@ -19,8 +19,8 @@ const inputs = [
   `Skill folder: ${skillDir}`,
   `Guide text: ${workDir}/guide.txt`,
   `Pack format: ${format}`,
-  `Learner context: ${learner || 'none'}`,
 ].join('\n')
+const learnerContext = `Learner context: ${learner || 'none'}`
 
 function stage(name, extra) {
   return `Read ${stages}, section "${name}", and follow it.\n\n${inputs}${extra ? `\n\n${extra}` : ''}`
@@ -88,9 +88,10 @@ if (!guide) throw new Error('The guide research returned nothing; check that gui
 
 phase('Judge')
 const plan = await agent(
-  stage('Judge', `Guide research:\n${JSON.stringify(guide)}\n\nDocs research:\n${JSON.stringify(docs || { facts: [], notes: 'docs research failed' })}`),
+  stage('Judge', `${learnerContext}\n\nGuide research:\n${JSON.stringify(guide)}\n\nDocs research:\n${JSON.stringify(docs || { facts: [], notes: 'docs research failed' })}`),
   { label: 'judge', schema: PLAN },
 )
+if (!plan) throw new Error('The judge returned nothing. Re-run with resumeFromRunId: the research results replay from cache.')
 log(`Parts: ${plan.parts.map(p => p.id).join(', ')}`)
 const facts = `Kept facts:\n${plan.kept.join('\n')}\n\nFlagged:\n${(plan.flagged || []).join('\n') || 'none'}`
 
@@ -100,17 +101,25 @@ const parts = await pipeline(
     stage('Write', `Part id: ${part.id}\nPart folder: ${workDir}/${part.id}\nPart title: ${part.title}\nPart plan:\n${part.plan}\n\n${facts}`),
     { label: `write:${part.id}`, phase: 'Write' },
   ),
-  (_, part) => agent(
-    stage('Review', `Part folder: ${workDir}/${part.id}\n\n${facts}`),
-    { label: `review:${part.id}`, phase: 'Review', schema: REVIEW },
-  ),
-  (review, part) => review.issues.length === 0
-    ? `No issues for ${part.id}`
-    : agent(
+  (written, part) => {
+    if (written == null) throw new Error(`The writer of ${part.id} returned nothing`)
+    return agent(
+      stage('Review', `Part folder: ${workDir}/${part.id}\n${learnerContext}\n\n${facts}`),
+      { label: `review:${part.id}`, phase: 'Review', schema: REVIEW },
+    )
+  },
+  (review, part) => {
+    if (review == null) throw new Error(`The reviewer of ${part.id} returned nothing`)
+    if (review.issues.length === 0) return `No issues for ${part.id}`
+    return agent(
       stage('Fix', `Part folder: ${workDir}/${part.id}\n\nReview issues:\n${JSON.stringify(review.issues, null, 2)}`),
       { label: `fix:${part.id}`, phase: 'Fix' },
-    ),
+    )
+  },
 )
+parts.forEach((result, index) => {
+  if (result == null) log(`Part ${plan.parts[index].id} failed; re-run with resumeFromRunId to retry it`)
+})
 
 return {
   parts: plan.parts.map((part, index) => ({

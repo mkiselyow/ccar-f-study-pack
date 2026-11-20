@@ -48,7 +48,7 @@ For each part, run the script, not a model, so answer letters and question order
 python3 -I scripts/shuffle_pack.py "<part folder>/body.md" "<part folder>/questions.json" "<output folder>/<part id>.md"
 ```
 
-It shuffles question order and option order with `secrets.SystemRandom`, fills in the `{opt:id}` letters, appends the answer key as an HTML comment, and prints the key, the word count and the reading time. It exits non-zero on a broken pack (missing option id, wrong number of correct options, leftover placeholder). On a failure, including more than 1,500 words, send the part back to the `Fix` stage with the script's message, then run the script again.
+It shuffles question order and option order with `secrets.SystemRandom`, fills in the `{opt:id}` letters, appends the answer key as an HTML comment, and prints the key, the word count and the reading time. It creates the output folder if needed. On a broken pack (case shape, options, placeholders, more than 1,500 words) it exits non-zero with the rule that failed and writes nothing; send the part back to the `Fix` stage with that message, then run the script again. A part whose result is null failed inside the workflow: re-run the Workflow with `resumeFromRunId` to retry it.
 
 ## 5. Report
 

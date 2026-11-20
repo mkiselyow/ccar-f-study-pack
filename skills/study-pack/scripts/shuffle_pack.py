@@ -3,9 +3,11 @@
 Usage: python3 -I shuffle_pack.py <body.md> <questions.json> <out.md>
 
 Question order and option order come from secrets.SystemRandom, so answer letters
-are truly random. Exits non-zero with a message when the pack breaks a rule.
+are truly random. Exits non-zero with a message, and writes nothing, when the pack
+breaks a rule.
 """
 import json
+import os
 import re
 import secrets
 import sys
@@ -17,8 +19,6 @@ WORDS_PER_MINUTE = 200
 MAX_WORDS = 1500
 FOOTER = ("*Practice questions written for this pack from the public CCAR-F exam guide and the Claude docs. "
           "They are not exam content: the exam's questions, options and scenarios are confidential under its NDA.*")
-
-
 SCENARIOS = ("Customer Support Resolution Agent", "Code Generation with Claude Code", "Multi-Agent Research System",
              "Developer Productivity with Claude", "Claude Code for Continuous Integration",
              "Structured Data Extraction")
@@ -26,11 +26,17 @@ SCENARIO = re.compile(r"\*\*Scenario: (" + "|".join(map(re.escape, SCENARIOS)) +
 EVIDENCE = re.compile(r"\*\*(Production logs show|Developers report|Production data shows):\*\*")
 GUESS = re.compile(r"\*\*Your guess:\*\*")
 REVEAL_FIELDS = ["Fix", "Mechanism", "The one thing that matters most"]
-CODE_BLOCK = re.compile(r"^```[^\n]*\n(.*?)^```", re.S | re.M)
+READING_LINE = re.compile(r"^Raw reading:[^\n]*?(?=\. With|$)", re.M)
+FENCE = re.compile(r"^(`{3,}|~{3,})")
+NOT_READ = re.compile(r"<!--.*?-->|</?(?:details|summary)>", re.S)
 
 
 class PackError(Exception):
     pass
+
+
+def reading_minutes(words: int) -> int:
+    return max(1, round(words / WORDS_PER_MINUTE))
 
 
 def check_case(text: str, where: str) -> None:
@@ -47,26 +53,64 @@ def section(body: str, start: str, end: str) -> str:
     return match.group(1)
 
 
+def closes(line: str, fence: str) -> bool:
+    mark = line.strip()
+    return len(mark) >= len(fence) and set(mark) == {fence[0]}
+
+
+def code_blocks(body: str) -> list[list[str]]:
+    blocks, current, fence = [], [], None
+    for line in body.split("\n"):
+        if fence is None:
+            match = FENCE.match(line)
+            if match:
+                fence, current = match.group(1), []
+        elif closes(line, fence):
+            blocks.append(current)
+            fence = None
+        else:
+            current.append(line)
+    if fence is not None:
+        raise PackError("body.md: a code block is never closed")
+    return blocks
+
+
 def check_body(body: str) -> None:
+    if "{{QUESTIONS}}" not in body:
+        raise PackError("body.md has no {{QUESTIONS}} placeholder")
+    if not READING_LINE.search(body):
+        raise PackError("body.md has no 'Raw reading:' line")
     check_case(section(body, "## 1.", "### Reveal"), "teaching case")
     fields = re.findall(r"^\*\*([^*]+?):\*\*", section(body, "### Reveal", "## 2."), re.M)
     if fields != REVEAL_FIELDS:
         raise PackError(f"reveal fields are {fields}, expected {REVEAL_FIELDS}")
-    for block in CODE_BLOCK.findall(body):
-        lines = block.split("\n")
+    for lines in code_blocks(body):
         if "---" in lines and lines[0] != "---" and all(not line.strip() for line in lines[:lines.index("---")]):
             raise PackError("a code block has blank lines before its frontmatter; '---' must be on line 1")
 
 
-def check_question(question: dict) -> None:
+def check_question(question: object) -> None:
+    if not isinstance(question, dict):
+        raise PackError(f"each question must be an object, got {question!r:.60}")
     qid = question.get("id", "?")
-    options = question.get("options", [])
-    ids = [option.get("id", "") for option in options]
+    for field in ("id", "stem", "explanation"):
+        if not isinstance(question.get(field), str) or not question[field].strip():
+            raise PackError(f"{qid}: '{field}' must be a non-empty string")
+    multi = question.get("multi")
+    if type(multi) is not int or multi == 1 or multi < 0:
+        raise PackError(f"{qid}: 'multi' must be the integer 0 or the number to pick (2 or more), got {multi!r}")
+    options = question.get("options")
+    if not isinstance(options, list) or not all(isinstance(option, dict) for option in options):
+        raise PackError(f"{qid}: 'options' must be a list of objects")
+    for option in options:
+        if not isinstance(option.get("id"), str) or not isinstance(option.get("text"), str) \
+                or type(option.get("correct")) is not bool:
+            raise PackError(f"{qid}: each option needs a string 'id' and 'text' and a true/false 'correct': {option}")
+    ids = [option["id"] for option in options]
     if len(set(ids)) != len(ids) or not all(OPTION_ID.match(i) for i in ids):
         raise PackError(f"{qid}: option ids must be unique and match [a-z0-9_]+: {ids}")
-    correct = sum(1 for option in options if option.get("correct"))
-    multi = question.get("multi", 0)
-    expected_correct = multi if multi else 1
+    correct = sum(1 for option in options if option["correct"])
+    expected_correct = multi or 1
     if correct != expected_correct:
         raise PackError(f"{qid}: {correct} correct options, expected {expected_correct}")
     expected_options = 5 if multi else 4
@@ -75,8 +119,7 @@ def check_question(question: dict) -> None:
     check_case(question["stem"], qid)
     if re.search(r"pick \d", question["stem"], re.I):
         raise PackError(f"{qid}: the stem says 'pick N'; the script adds it")
-    text = question["stem"] + question["explanation"]
-    unknown = [ref for ref in OPTION_REF.findall(text) if ref not in ids]
+    unknown = [ref for ref in OPTION_REF.findall(question["stem"] + question["explanation"]) if ref not in ids]
     if unknown:
         raise PackError(f"{qid}: unknown option ids {unknown}")
 
@@ -98,16 +141,14 @@ def render_question(number: int, question: dict, rng: secrets.SystemRandom) -> t
     return "\n".join(lines), correct
 
 
-def build(body: str, questions: list[dict], rng: secrets.SystemRandom) -> tuple[str, list[str]]:
-    if "{{QUESTIONS}}" not in body:
-        raise PackError("body.md has no {{QUESTIONS}} placeholder")
-    if len(questions) != 3:
-        raise PackError(f"{len(questions)} questions, expected 3")
-    if not any(question.get("multi") for question in questions):
-        raise PackError("no multiple-response question")
+def build(body: str, questions: object, rng: secrets.SystemRandom) -> tuple[str, list[str], int]:
     check_body(body)
+    if not isinstance(questions, list) or len(questions) != 3:
+        raise PackError("questions.json must be a list of 3 questions")
     for question in questions:
         check_question(question)
+    if not any(question["multi"] for question in questions):
+        raise PackError("no multiple-response question")
     order = list(questions)
     rng.shuffle(order)
     blocks, key = [], []
@@ -119,26 +160,30 @@ def build(body: str, questions: list[dict], rng: secrets.SystemRandom) -> tuple[
     if re.search(r"\{opt:|\{\{", pack):
         raise PackError("a placeholder is left in the pack")
     pack += f"\n\n---\n\n{FOOTER}\n"
+    words = len(NOT_READ.sub(" ", pack).split())
+    if words > MAX_WORDS:
+        raise PackError(f"{words} words, the limit is about {MAX_WORDS}")
+    pack = READING_LINE.sub(f"Raw reading: about {reading_minutes(words)} min", pack, count=1)
     pack += f"\n<!-- answer key, shuffled with secrets.SystemRandom: {' '.join(key)} -->\n"
-    return pack, key
+    return pack, key, words
 
 
 def main(body_path: str, questions_path: str, out_path: str) -> None:
-    with open(body_path) as body_file, open(questions_path) as questions_file:
-        body, questions = body_file.read(), json.load(questions_file)
     try:
-        pack, key = build(body, questions, secrets.SystemRandom())
-    except PackError as error:
+        with open(body_path) as body_file, open(questions_path) as questions_file:
+            body, questions = body_file.read(), json.load(questions_file)
+        pack, key, words = build(body, questions, secrets.SystemRandom())
+    except json.JSONDecodeError as error:
+        sys.exit(f"Pack check failed: questions.json is not valid JSON: {error}")
+    except (OSError, PackError) as error:
         sys.exit(f"Pack check failed: {error}")
-    words = len(re.sub(r"<!--.*?-->|<[^>]+>", " ", pack, flags=re.S).split())
-    minutes = max(1, round(words / WORDS_PER_MINUTE))
-    pack = re.sub(r"Raw reading: about \d+ min", f"Raw reading: about {minutes} min", pack, count=1)
+    folder = os.path.dirname(out_path)
+    if folder:
+        os.makedirs(folder, exist_ok=True)
     with open(out_path, "w") as out_file:
         out_file.write(pack)
     print(f"key: {' '.join(key)}")
-    print(f"words: {words}, raw reading: about {minutes} min")
-    if words > MAX_WORDS:
-        sys.exit(f"Pack check failed: {words} words, the limit is about {MAX_WORDS}")
+    print(f"words: {words}, raw reading: about {reading_minutes(words)} min")
 
 
 if __name__ == "__main__":

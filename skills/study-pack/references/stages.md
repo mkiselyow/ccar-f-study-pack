@@ -1,6 +1,6 @@
 # Pipeline stages
 
-Each agent of the pipeline reads its own section. The inputs (task, work folder, guide text, skill folder, learner context) come in the agent's prompt. The format rules are in `pack-format.md` next to this file.
+Each agent of the pipeline reads its own section. The inputs (task, work folder, guide text, skill folder) come in the agent's prompt; the learner context goes only to the judge and the reviewer. The format rules are in `pack-format.md` next to this file.
 
 ## Research: guide
 
