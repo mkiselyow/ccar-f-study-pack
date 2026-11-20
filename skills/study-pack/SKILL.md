@@ -36,7 +36,7 @@ Call the **Workflow** tool with `scriptPath: <skill dir>/workflow.js` and these 
   "learner": "<score lines or plan path, or empty string>" }
 ```
 
-Using this skill is the user's opt-in to the workflow. The workflow runs research (guide + docs), judge, then per part write, review and fix. It returns the parts, each with the folder that holds its `body.md` and `questions.json`.
+Using this skill is the user's opt-in to the workflow. The workflow runs research (guide + docs), judge, then per part write, review and fix. It returns the parts, each with the folder that holds its `body.md` and `questions.json`, and the judge's kept and flagged facts, each with its source. Keep the facts for the follow-ups of step 6.
 
 **No Workflow tool in this session?** Run the same stages with the Agent tool, in the order of `workflow.js`: give each agent the instruction "Read `<skill dir>/references/stages.md`, section `<stage>`, and follow it" plus the same inputs. Run the 2 research agents in parallel.
 
@@ -55,3 +55,8 @@ It shuffles question order and option order with `secrets.SystemRandom`, fills i
 - A link to each pack file and its reading time.
 - **Never show the answer key in chat.** The learner reads the answers in the pack after guessing.
 - If a task was split, say why in one line.
+- End with 1 line inviting questions about any part of the pack.
+
+## 6. Follow-up questions
+
+Read each final pack once, right after step 4, so you can answer questions about it without opening the file again. Answer from the pack and the kept facts, and cite the source line (guide page or doc URL). For a flagged fact, give the guide's answer as the exam answer and the docs' version after it. When a question goes beyond those facts, say so and check the docs before you answer. Reveal the answer to a practice question only when the learner asks for it.

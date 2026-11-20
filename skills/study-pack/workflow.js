@@ -112,9 +112,13 @@ const parts = await pipeline(
     ),
 )
 
-return plan.parts.map((part, index) => ({
-  id: part.id,
-  title: part.title,
-  folder: `${workDir}/${part.id}`,
-  result: parts[index],
-}))
+return {
+  parts: plan.parts.map((part, index) => ({
+    id: part.id,
+    title: part.title,
+    folder: `${workDir}/${part.id}`,
+    result: parts[index],
+  })),
+  kept: plan.kept,
+  flagged: plan.flagged || [],
+}

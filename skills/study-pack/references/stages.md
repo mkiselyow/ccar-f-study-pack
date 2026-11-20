@@ -26,7 +26,7 @@ If no web tool works, say so and return nothing invented: the judge then relies 
 
 ## Judge
 
-You get both research reports. For each fact, decide: **keep** (the guide states it, or the docs confirm it and it serves the guide's statement), **drop** (out of scope, unverifiable, or detail the exam doesn't test), or **flag** (guide and docs disagree: keep the guide's answer as the exam answer, and note the docs' version in 1 line).
+You get both research reports. For each fact, decide: **keep** (the guide states it, or the docs confirm it and it serves the guide's statement), **drop** (out of scope, unverifiable, or detail the exam doesn't test), or **flag** (guide and docs disagree: keep the guide's answer as the exam answer, and note the docs' version in 1 line). Return each kept and flagged fact as 1 line: the claim, then its source as a guide page or a doc URL. The learner's session answers follow-up questions from these lines.
 
 Then plan the pack by `pack-format.md`:
 
