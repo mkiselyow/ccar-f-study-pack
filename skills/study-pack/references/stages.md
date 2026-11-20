@@ -51,10 +51,10 @@ Use only the kept facts of the judge. Write short sentences and plain words. Sho
 Then run the pack check and fix the files until it passes:
 
 ```bash
-python3 -I <skill folder>/scripts/shuffle_pack.py <part folder>/body.md <part folder>/questions.json /dev/null
+bash <skill folder>/scripts/pack.sh <part folder>/body.md <part folder>/questions.json /dev/null
 ```
 
-It checks the case shape of the teaching case and every question, the 3 reveal fields, frontmatter on line 1 of each code block, the options, the `{opt:id}` references and the word count.
+If it exits 127 (no Python or Node), check the rules of `pack-format.md` by reading instead. It checks the case shape of the teaching case and every question, the 3 reveal fields, frontmatter on line 1 of each code block, the options, the `{opt:id}` references and the word count.
 
 ## Review
 

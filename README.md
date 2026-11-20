@@ -30,14 +30,16 @@ Raw reading is 5–10 minutes; with the guesses and questions about 45 minutes, 
 
 ## How it is built
 
-Each run downloads the official exam guide and runs a pipeline of agents: research (guide and Claude docs in parallel), a judge that keeps, drops or flags each fact, then per part a writer, an independent reviewer and a fixer. A Python script, not a model, then shuffles question order and answer options with `secrets.SystemRandom`, so the right answers don't cluster on B.
+Each run downloads the official exam guide and runs a pipeline of agents: research (guide and Claude docs in parallel), a judge that keeps, drops or flags each fact, then per part a writer, an independent reviewer and a fixer. A script, not a model, then checks the pack and shuffles question order and answer options with the system's random source, so the right answers don't cluster on B. It runs on Python or on Node, whichever is installed.
 
 Rules for the pack: [skills/study-pack/references/pack-format.md](skills/study-pack/references/pack-format.md). Agent instructions: [skills/study-pack/references/stages.md](skills/study-pack/references/stages.md).
 
 ## Requirements
 
 - Claude Code with the Workflow tool (falls back to plain subagents without it) and web access for the docs check.
-- `curl`, `python3`, and `pdftotext` (poppler) or the `pypdf` package.
+- `curl`.
+- Python 3.9+ or Node for the shuffle and the pack check. Claude Code installed through npm already brings Node. On macOS, `python3` comes with the command-line tools (`xcode-select --install`); most developers have them because `git` needs them. With neither, the skill shuffles from `/dev/urandom` and checks the pack by reading, and says so.
+- Optional: `pdftotext` (poppler) or the `pypdf` package, to extract the guide cheaply. Without them, Claude reads the PDF with its own Read tool, which costs more context.
 
 ## Exam content
 

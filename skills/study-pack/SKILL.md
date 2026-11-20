@@ -45,10 +45,17 @@ Using this skill is the user's opt-in to the workflow. The workflow runs researc
 For each part, run the script, not a model, so answer letters and question order are truly random:
 
 ```bash
-python3 -I scripts/shuffle_pack.py "<part folder>/body.md" "<part folder>/questions.json" "<output folder>/<part id>.md"
+bash scripts/pack.sh "<part folder>/body.md" "<part folder>/questions.json" "<output folder>/<part id>.md"
 ```
 
-It shuffles question order and option order with `secrets.SystemRandom`, fills in the `{opt:id}` letters, appends the answer key as an HTML comment, and prints the key, the word count and the reading time. It creates the output folder if needed. On a broken pack (case shape, options, placeholders, more than 2,400 words) it exits non-zero with the rule that failed and writes nothing; send the part back to the `Fix` stage with that message, then run the script again. A part whose result is null failed inside the workflow: re-run the Workflow with `resumeFromRunId` to retry it.
+`pack.sh` runs `shuffle_pack.py` with Python 3.9+, or the same checks in `shuffle_pack.mjs` with Node when Python is missing. Either one shuffles question order and option order with the system's random source, fills in the `{opt:id}` letters, appends the answer key as an HTML comment, and prints the key, the word count and the reading time. It creates the output folder if needed. On a broken pack (case shape, options, placeholders, more than 2,400 words) it exits non-zero with the rule that failed and writes nothing; send the part back to the `Fix` stage with that message, then run the script again. A part whose result is null failed inside the workflow: re-run the Workflow with `resumeFromRunId` to retry it.
+
+**Exit 127: neither Python nor Node.** Tell the user once that installing either makes the checks automatic, then build the pack by hand:
+
+1. Get random numbers from the system, never choose them yourself: `od -An -tu1 -N16 /dev/urandom`.
+2. Order the questions, then the options of each question, by a Fisher-Yates shuffle: for position i from the last down to 1, swap it with position `number mod (i + 1)`, taking the next number each time.
+3. Replace `{{QUESTIONS}}` with the questions in the layout the script uses: `**Q1.** ` and, for multiple response, ` (multiple response, pick N)` before the stem; options as `A) …`; then a `<details><summary>Answer</summary>` block that starts with the correct letters in bold. Write every `{opt:id}` as its letter.
+4. Check every rule of `references/pack-format.md` by reading, add the footer line of the script and the answer key comment, and say in the report that the pack was checked by reading, not by the script.
 
 ## 5. Report
 
